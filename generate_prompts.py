@@ -6,6 +6,7 @@ AJ Boyd
 import pandas as pd
 import json
 from tqdm import tqdm
+import numpy as np
 
 # global constants
 INPUT_FILE = "data/msd_split.csv"
@@ -73,13 +74,22 @@ Key: {int(row["key"])}
 Mode: {int(row["mode"])}
 Time signature: {int(row["time_signature"])}
 
-Return only one concise sentence describing the song's overall musical character, incorporating its style, mood, energy, atmosphere, and other relevant characteristics inferred from the provided metadata and acoustic features.
+Return only one concise sentence (not a list) describing the song's overall musical character, incorporating its style, mood, energy, atmosphere, and other relevant characteristics inferred from the provided metadata and acoustic features. Don't include the song's name in the sentence.
 For example: \"A fast, gritty garage-rock track with an energetic, rebellious character and a raw, driving atmosphere.\""""
 
 # generate prompts for all songs in the dataset
 if __name__ == "__main__":
     df = pd.read_csv(INPUT_FILE)
-    df = df[df["split"] == "train"].copy()
+    # df = df[df["split"] == "train"].copy()
+
+    labels = np.load("data/cluster_labels.npy")
+
+    if len(df) != len(labels):
+        raise ValueError(
+            f"Row mismatch: {len(df)} songs but {len(labels)} cluster labels."
+        )
+
+    df["cluster_label"] = labels
     prompts = []
 
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Generating prompts"):
@@ -88,6 +98,7 @@ if __name__ == "__main__":
             "title": row["title"],
             "artist_name": row["artist_name"],
             "release": row["release"],
+            "cluster_label": row["cluster_label"],
             "year": row["year"],
             "split": row["split"],
             "prompt": build_prompt(row)

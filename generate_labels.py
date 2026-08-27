@@ -4,12 +4,12 @@ import requests
 from tqdm import tqdm
 
 INPUT_FILE = "data/song_prompts.csv"
-OUTPUT_FILE = "data/song_labels.csv"
+OUTPUT_FILE = "data/song_labels2.csv"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "llama3.1:8b"
 
 df = pd.read_csv(INPUT_FILE)
-df = df[df["split"] == "train"].copy()
+# df = df[df["split"] == "train"].copy()
 
 if os.path.exists(OUTPUT_FILE):
     results = pd.read_csv(OUTPUT_FILE)
@@ -37,8 +37,7 @@ for _, row in tqdm(
     desc="Generating labels"
 ):
     prompt = f"""
-Given the following information about a song, write exactly one sentence
-describing its overall musical character.
+Given the following information about a song, write exactly one sentence (not a list) that concisely describes the song's overall musical character, including its style, mood, energy, atmosphere, and other relevant characteristics.
 
 Use only characteristics reasonably supported by the provided information.
 Do not mention numerical values, the analysis process, or the information
@@ -67,6 +66,7 @@ Return only the sentence.
             "track_id": row["track_id"],
             "title": row["title"],
             "artist": row["artist_name"],
+            "cluster_label": row["cluster_label"],
             "split": row["split"],
             "semantic_description": description
         }
