@@ -20,6 +20,10 @@ def extract_fields_final(h5_path):
     row = {}
 
     with h5py.File(h5_path, 'r') as h5:
+        #----- Track ID -----
+        songs = h5["analysis/songs"][0]
+        row["track_id"] = songs["track_id"].decode("utf-8", errors="ignore")
+
         # ----- Metadata -----
         songs = h5["metadata/songs"][0]
         musicbrainz = h5["musicbrainz/songs"][0]
@@ -69,7 +73,7 @@ def extract_fields_final(h5_path):
             "end_of_fade_in"
         ]
         songs = h5["analysis/songs"][0]
-
+        row["track_id"] = songs["track_id"].decode("utf-8", errors="ignore")
         for field in scalar_fields:
             row[field] = float(songs[field])
 

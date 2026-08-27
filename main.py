@@ -46,6 +46,8 @@ def weighted_mean(arr, weights):
 # pre-requisite: preprocess_data.py should have been run to generate data/msd.csv
 # Load and define data
 df = pd.read_csv(DATA_FILE)
+if "track_id" not in df.columns:
+    raise ValueError("Column 'track_id' is missing from the dataset")
 
 # test/train split
 train_df, test_df = train_test_split(
@@ -85,6 +87,7 @@ if __name__ == "__main__":
 
     for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing arrays"):
         song_features = []
+        
 
         for feat in array_features:
             vals = json_to_array(row[f"{feat}_start"])
@@ -148,6 +151,7 @@ if __name__ == "__main__":
         for row in np.unique(rows)[:10]:
             print("=" * 60)
             print(f"Row: {row}")
+            print(f"Track ID: {df.loc[row, 'track_id']}")
             print(f"Title : {df.loc[row, 'title']}")
             print(f"Artist: {df.loc[row, 'artist_name']}")
 
@@ -219,5 +223,6 @@ if __name__ == "__main__":
 
     # ----- Save clustered data -----
     df.to_csv("data/msd_clustered.csv", index=False)
+    print(df[["track_id", "title", "artist_name", "split", "cluster_label"]].head())
 
     print("✅ Saved clustered data to data/msd_clustered.csv")
